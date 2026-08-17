@@ -118,7 +118,7 @@ jobs:
           apiToken: ${{ steps.cloudflare-token.outputs.token }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           wranglerVersion: '4'
-          command: versions upload --tag github-${{ github.sha }} --secrets-file .wrangler-secrets.json
+          command: versions upload --tag github-${{ github.sha }}-${{ github.run_id }} --secrets-file .wrangler-secrets.json
 
       - name: 🚀 Deploy Worker version
         uses: cloudflare/wrangler-action@v3
@@ -126,7 +126,7 @@ jobs:
           apiToken: ${{ steps.cloudflare-token.outputs.token }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           wranglerVersion: '4'
-          command: versions deploy --version-tag github-${{ github.sha }} --percentage 100 --yes
+          command: versions deploy --version-tag github-${{ github.sha }}-${{ github.run_id }} --percentage 100 --yes
 
       - name: 🧹 Remove Worker secrets file
         if: always()
