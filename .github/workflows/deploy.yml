@@ -96,10 +96,20 @@ jobs:
       # wrangler v4 的 `deploy` 会自动根据 wrangler.toml 中的 [[durable_objects.bindings]]
       # 声明创建 DO namespace（幂等：已存在则跳过），无需单独命令。
       # 前提：MetricsBroadcaster 类必须从 index.js 导出（已通过 src/index.js 实现）。
+      - name: 🔐 Normalize Cloudflare API token
+        id: cloudflare-token
+        shell: bash
+        env:
+          RAW_CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          token="$(printf '%s' "$RAW_CF_API_TOKEN" | tr -d '\r\n')"
+          echo "::add-mask::$token"
+          printf 'token=%s\n' "$token" >> "$GITHUB_OUTPUT"
+
       - name: 🚀 Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
+          apiToken: ${{ steps.cloudflare-token.outputs.token }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           wranglerVersion: '4'
           command: deploy
